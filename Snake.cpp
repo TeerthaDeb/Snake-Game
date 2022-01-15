@@ -1,3 +1,11 @@
+   
+/**
+	AUTHOR 		:	TEERTHA DEB
+	STOP_STALK 	:	stopstalk.com/user/profile/Teertha_Deb
+	GitHub		:	github.com/TeerthaDeb
+**/
+
+
 #include <bits/stdc++.h>
 #include <windows.h>
 #include <time.h>
