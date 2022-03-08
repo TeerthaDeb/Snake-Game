@@ -1,4 +1,4 @@
-   
+
 /**
 	AUTHOR 		:	TEERTHA DEB
 	STOP_STALK 	:	stopstalk.com/user/profile/Teertha_Deb
@@ -12,6 +12,8 @@
 #include <stdlib.h>
 #include <conio.h>
 #include <vector>
+#include <sys/stat.h>
+//#include <sys/types.h>
 using namespace std;
 #define clr system("cls")
 #define body printf("*")
@@ -21,15 +23,48 @@ unsigned long long int current_player_score = 0;
 char ch = 'w', snake[115][30] = {'.'}, tch = 'w', cch;
 char current_player_name[50];
 
-struct record
+
+class player
 {
-	char name[50];
-	unsigned long long int score;
+private:
+	char name[100];
+	long long int score = 0;
+	friend bool compare_players(player , player);
+public:
+	player()
+	{
+	}
+	~player()
+	{
+	}
+
+	//setters:
+
+	void set_score(long long int player_score)
+	{
+		score = player_score;
+	}
+	void set_name(string player_name)
+	{
+		strcpy(name , player_name.c_str());
+	}
+
+	//getters:
+
+	string get_name()
+	{
+		return name;
+	}
+	long long int get_score()
+	{
+		return score;
+	}
 };
 
-bool compare_players(record a, record b)
+
+bool compare_players(player a, player b)
 {
-	return a.score > b.score;
+	return a.score > b.score ;
 }
 
 void gxy(short col, short row)
@@ -88,25 +123,31 @@ void drawboard()
 
 void high_score()
 {
-	vector<record> player;
-	record tmp;
-	fstream file_ptr("score.txt", ios::in);
-	if(!file_ptr){
-        char tmp_name[15] = "Teertha Deb\0";
-        strcpy(tmp.name, tmp_name);
-		for(int i = 1 ; i<9 ; i++){
-			tmp.score = i;
-			player.push_back(tmp);
+	vector<player> players;
+	player temp;
+	const char* dirname = "C:\\Users\\Public\\Documents\\TDsoftwares\\Snake_Game";
+	if (mkdir(dirname) == -1){
+		if(errno != 17){
+			gxy(10 , 6) , printf("Mail teertha.deb579@gmail.com with the errorcode: ");cout<<errno;
 		}
-        tmp.score = 100;
-        player.push_back(tmp);
+	}
+	fstream file_ptr;
+	file_ptr.open("C:\\Users\\Public\\Documents\\TDsoftwares\\Snake_Game\\Score.MTD" , ios::in);
+	if(!file_ptr){
+	    temp.set_name("Teertha Deb");
+		for(long long int i = 1 ; i<9 ; i++){
+			temp.set_score(i);
+			players.push_back(temp);
+		}
+        temp.set_score(100);
+        players.push_back(temp);
 	}
 	else
 	{
 		for (int i = 0; i < 10; i++)
 		{
-			file_ptr.read(reinterpret_cast<char *>(&tmp), sizeof(tmp));
-			player.push_back(tmp);
+			file_ptr.read((char*) &temp , sizeof(temp));
+			players.push_back(temp);
 		}
 	}
 	file_ptr.close();
@@ -114,20 +155,19 @@ void high_score()
 	gxy(5, 5);
 	printf("Enter current player's name : ");
 	cin.getline(current_player_name, 50);
-	strcpy(tmp.name, current_player_name);
-	tmp.score = current_player_score;
-	player.push_back(tmp);
-	sort(player.begin(), player.end(), compare_players);
-	file_ptr.open("score.txt", ios::out);
+	temp.set_name(current_player_name);
+	temp.set_score(current_player_score);
+	players.push_back(temp);
+	sort(players.begin(), players.end(), compare_players);
+	file_ptr.open("C:\\Users\\Public\\Documents\\TDsoftwares\\Snake_Game\\Score.MTD" , ios::out);
 	clr;
 	setcolor(10);
 	drawboard();
 	for (int i = 0; i < 10; i++)
 	{
-		tmp = player[i];
-		file_ptr.write(reinterpret_cast<char *>(&tmp), sizeof(tmp));
+		file_ptr.write((char *)(&players[i]), sizeof(players[i]));
 		gxy(2, i + 2);
-		printf("Rank=%3d | name=%35s | score=%5u", i + 1, tmp.name, player[i].score);
+		printf("Rank=%3d | name=%35s | score=%5u", i + 1, players[i].get_name().c_str() , players[i].get_score());
 		cout << '\n';
 	}
 	file_ptr.close();
@@ -331,6 +371,7 @@ void game_over()
 
 int main()
 {
+	SetConsoleTitle("                                                                                                                                      Snake Game");
 	gxy(10, 5), printf("enter your windows version: ");
 	gxy(10, 7), printf("[1] windows 7 (or previous version)");
 	gxy(10, 9), printf("[2] windows 10(or later version after 7)");
