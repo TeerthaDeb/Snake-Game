@@ -13,22 +13,21 @@
 #include <conio.h>
 #include <vector>
 #include <sys/stat.h>
-//#include <sys/types.h>
+#include <sys/types.h>
 using namespace std;
 #define clr system("cls")
 #define body printf("*")
 #define head printf("O")
-int width = 119, height = 28, fx = width / 2 - 10, fy = height / 2 - 5, x = width / 2, y = height / 2, gameover = 0, tx = x, ty = y + 3, slow_down = 100;
+int width = 119, height = 28, fx = width / 2 - 10, fy = height / 2 - 5, x = width / 2, y = height / 2, tx = x, ty = y + 3, slow_down = 100;
 unsigned long long int current_player_score = 0;
-char ch = 'w', snake[115][30] = {'.'}, tch = 'w', cch;
-char current_player_name[50];
-
+char ch = 'w', snake[115][30] = {'.'}, tch = 'w', cch , current_player_name[50];
+bool  gameover = 0;
 
 class player
 {
 private:
-	char name[100];
-	long long int score = 0;
+	char name[50];
+	unsigned long long int score = 0;
 	friend bool compare_players(player , player);
 public:
 	player()
@@ -129,6 +128,7 @@ void high_score()
 	if (mkdir(dirname) == -1){
 		if(errno != 17){
 			gxy(10 , 6) , printf("Mail teertha.deb579@gmail.com with the errorcode: ");cout<<errno;
+			exit(0);
 		}
 	}
 	fstream file_ptr;
