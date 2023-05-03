@@ -1,6 +1,6 @@
 
 /**
-	AUTHOR 		:	TEERTHA DEB
+	AUTHOR 		:	MAHARAJ TEERTHA DEB
 	STOP_STALK 	:	stopstalk.com/user/profile/Teertha_Deb
 	GitHub		:	github.com/TeerthaDeb
 **/
@@ -18,17 +18,17 @@ using namespace std;
 #define clr system("cls")
 #define body printf("*")
 #define head printf("O")
-int width = 119, height = 28, fx = width / 2 - 10, fy = height / 2 - 5, x = width / 2, y = height / 2, tx = x, ty = y + 3, slow_down = 100;
+int width = 119, height = 28, fx = width / 2 - 10, fy = height / 2 - 5, x = width / 2, y = height / 2, tx = x, ty = y + 3, slow_down = 100 , sfx, sfy , special_food_count_down , loop_count;
 unsigned long long int current_player_score = 0;
 char ch = 'w', snake[115][30] = {'.'}, tch = 'w', cch , current_player_name[50];
-bool  gameover = 0;
+bool  gameover = 0 , special_food_generated = false;
 
 class player
 {
 private:
 	char name[50];
 	unsigned long long int score = 0;
-	friend bool compare_players(player , player);
+	//friend bool compare_players(player , player); /* not gonna use it again */
 public:
 	player()
 	{
@@ -54,16 +54,20 @@ public:
 	{
 		return name;
 	}
-	long long int get_score()
+	unsigned long long int get_score()
 	{
 		return score;
+	}
+	bool is_greater(const player b)
+	{
+		return (this -> score > b.score);
 	}
 };
 
 
 bool compare_players(player a, player b)
 {
-	return a.score > b.score ;
+	return a.is_greater(b);
 }
 
 void gxy(short col, short row)
@@ -253,6 +257,7 @@ void replacexy()
 
 void print_everything()
 {
+	setcolor(07);
 	if (ch == 'w')
 	{
 		gxy(x, y);
@@ -315,8 +320,8 @@ void print_everything()
 	}
 	gxy(tx, ty);
 	printf(" ");
-	setcolor(14);
 	gxy(fx, fy);
+	setcolor(17);
 	printf("%c", 237);
 }
 
@@ -348,8 +353,8 @@ void eraser()
 
 void food()
 {
-	gxy(x, y);
-	printf("0\a");
+	// gxy(x, y);
+	// printf("0\a");
 	fx = rand() % width + 1;
 	fy = rand() % (height - 4) + 1;
 	while (snake[fx][fy] == 'w' || snake[fx][fy] == 'a' || snake[fx][fy] == 's' || snake[fx][fy] == 'd')
@@ -357,8 +362,54 @@ void food()
 		fx = rand() % width + 1;
 		fy = rand() % (height - 4) + 1;
 	}
-	gxy(2, height - 2);
-	printf("Score=%u", ++current_player_score);
+	snake[fx][fy] = 'F';
+	setcolor(07);
+	gxy(2 , height - 2);
+	printf("Score: %u", ++current_player_score);
+}
+ 
+
+void special_food()
+{
+/**
+	* @brief : 	This function is called when user has a score that is divisible by 10
+				A special fool will be generated for 10 seconds and if user can get it score will be increased by 5
+ 	* @return (void)
+*/
+	special_food_generated = true;
+	special_food_count_down = 50;
+	sfx = rand() % width + 1;
+	sfy = rand() % (height - 4) + 1;
+	while (snake[sfx][sfy] == 'w' || snake[sfx][sfy] == 'a' || snake[sfx][sfy] == 's' || snake[sfx][sfy] == 'd' || snake[sfx][sfy] == 'F')
+	{
+		sfx = rand() % width + 1;
+		sfy = rand() % (height - 4) + 1;
+	}
+	gxy(sfx , sfy);
+	setcolor(01);
+	printf("&");//Print the special food.
+}
+
+
+void special_food_eaten()
+{
+/***
+ *** @brief :  	This function is called when special food is eaten.
+				the score will be increased by 5;
+				the special food count down will be gone from the screen.
+ *** @return: 	NONE 
+***/
+	special_food_generated = false;
+	special_food_count_down = 0;
+	current_player_score += 5;
+	gxy(sfx , sfy);
+	printf("0");
+	gxy(1 , height - 1);
+	snake[sfx][sfy] = '.';
+	printf("                                     ");
+	setcolor(07);
+	gxy(2 , height - 2);
+	printf("Score: %u", ++current_player_score);
 }
 
 void game_over()
@@ -404,13 +455,37 @@ int main()
 			position_eraser();
 			eraser();
 		}
+		if(special_food_generated == false and current_player_score % 10 == 0 and current_player_score > 0){
+			special_food();
+			loop_count = 0;
+		}
+		if(special_food_generated){
+			loop_count++;
+			special_food_count_down--;
+			if(sfx == x and sfy == y){
+				special_food_eaten();
+			}
+			else if(special_food_count_down > 0){
+				gxy(floor(loop_count*0.1) + 2, height - 1);
+				printf("|");
+			}
+			if(special_food_count_down == 0){
+				special_food_generated = false;
+				gxy(sfx , sfy);
+				printf(" ");
+				gxy(1 , height - 1);
+				snake[sfx][sfy] = '.';
+				printf("                                     ");
+			}
+		}
 		print_everything();
-		Sleep(slow_down - current_player_score);
+		Sleep(slow_down - current_player_score*2);
 	}
 	Sleep(700);
 	clr;
 	drawboard();
 	gxy(width / 2 - 5, height / 2 - 3);
+	setcolor(16);
 	printf("!!! Game Over !!!");
 	gxy(width / 2 - 5, height / 2);
 	printf("!!! Score = %u !!!", current_player_score);
