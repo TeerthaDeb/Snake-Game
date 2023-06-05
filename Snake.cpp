@@ -1,4 +1,3 @@
-
 /**
 	AUTHOR 		:	MAHARAJ TEERTHA DEB
 	STOP_STALK 	:	stopstalk.com/user/profile/Teertha_Deb
@@ -21,7 +20,7 @@ using namespace std;
 int width = 119, height = 28, fx = width / 2 - 10, fy = height / 2 - 5, x = width / 2, y = height / 2, tx = x, ty = y + 3, slow_down = 100 , sfx, sfy , special_food_count_down , loop_count;
 unsigned long long int current_player_score = 0;
 char ch = 'w', snake[115][30] = {'.'}, tch = 'w', cch , current_player_name[50];
-bool  gameover = 0 , special_food_generated = false;
+bool  gameover = 0 , special_food_generated = false , generate_special_food_again = false;
 
 class player
 {
@@ -323,6 +322,8 @@ void print_everything()
 	gxy(fx, fy);
 	setcolor(17);
 	printf("%c", 237);
+	//Need to take the beeping pointer to the end of the terminal, so it does not beep after the food.
+	gxy(width , height+1); printf("");
 }
 
 void position_eraser()
@@ -355,6 +356,7 @@ void food()
 {
 	// gxy(x, y);
 	// printf("0\a");
+	generate_special_food_again = true;
 	fx = rand() % width + 1;
 	fy = rand() % (height - 4) + 1;
 	while (snake[fx][fy] == 'w' || snake[fx][fy] == 'a' || snake[fx][fy] == 's' || snake[fx][fy] == 'd')
@@ -367,7 +369,7 @@ void food()
 	gxy(2 , height - 2);
 	printf("Score: %u", ++current_player_score);
 }
- 
+
 
 void special_food()
 {
@@ -376,6 +378,7 @@ void special_food()
 				A special fool will be generated for 10 seconds and if user can get it score will be increased by 5
  	* @return (void)
 */
+	loop_count = 0;
 	special_food_generated = true;
 	special_food_count_down = 50;
 	sfx = rand() % width + 1;
@@ -387,6 +390,7 @@ void special_food()
 	}
 	gxy(sfx , sfy);
 	setcolor(01);
+	generate_special_food_again = false;
 	printf("&");//Print the special food.
 }
 
@@ -397,7 +401,7 @@ void special_food_eaten()
  *** @brief :  	This function is called when special food is eaten.
 				the score will be increased by 5;
 				the special food count down will be gone from the screen.
- *** @return: 	NONE 
+ *** @return: 	NONE
 ***/
 	special_food_generated = false;
 	special_food_count_down = 0;
@@ -410,6 +414,7 @@ void special_food_eaten()
 	setcolor(07);
 	gxy(2 , height - 2);
 	printf("Score: %u", ++current_player_score);
+	generate_special_food_again = true;
 }
 
 void game_over()
@@ -423,6 +428,23 @@ void game_over()
 int main()
 {
 	SetConsoleTitle("                                                                                                                                      Snake Game");
+	
+	
+	//Introduction.......
+	{
+		clr;
+		setcolor(70);
+		gxy(width / 2 - 15 , height / 2 - 5);
+		printf("Snake game 3.0.0 <June , 2023>");
+		Sleep(1500);
+		setcolor(int(rand() % 19));
+		gxy(width / 2 - 7 , height / 2 - 4);
+		printf("Designed by:    \n\t\t\t\t\t\tMaharaj Teertha Deb");
+		Sleep(5000);
+	}
+
+    clr;
+    drawboard();
 	gxy(10, 5), printf("enter your windows version: ");
 	gxy(10, 7), printf("[1] windows 7 (or previous version)");
 	gxy(10, 9), printf("[2] windows 10(or later version after 7)");
@@ -433,6 +455,7 @@ int main()
 	{
 		width = 79, height = 22, slow_down = 130;
 	}
+	clr;
 	snake[tx][y + 1] = 'w';
 	snake[tx][y + 2] = 'w';
 	clr;
@@ -455,9 +478,8 @@ int main()
 			position_eraser();
 			eraser();
 		}
-		if(special_food_generated == false and current_player_score % 10 == 0 and current_player_score > 0){
+		if(special_food_generated == false and generate_special_food_again == true and current_player_score % 10 == 0 and  current_player_score > 0){
 			special_food();
-			loop_count = 0;
 		}
 		if(special_food_generated){
 			loop_count++;
